@@ -3,22 +3,22 @@ if (!window.promptsData) {
 }
 
 window.promptsData.push({
-  refId: "p11ref",
-  title: "Mecha Pilot & Combat Unit 01",
-  category: "Anime / Mecha",
-  description: "Classic 90s Mecha Pilot",
-  prompt: `A determined female mecha pilot standing in a futuristic hangar bay in front of a giant blue and white combat robot. She has short wavy reddish-brown hair and wears a fitted red and white pilot suit while holding her flight helmet. Technicians and hangar lights fill the background. 90s classic mecha anime aesthetic.
+  refId: "p14ref",
+  title: "Neon Gamer Girl Setup",
+  category: "Anime / Slice of Life",
+  description: "Neon Gaming Bedroom",
+  prompt: `A cool anime gamer girl with green-highlighted black hair sitting relaxed in a gaming chair inside a dark bedroom lit with purple and green neon LED strips. Multiple computer monitors display gaming streams and chat windows. She wears a black oversized hoodie, headphones, and fishnet sleeves.
 
 Character details:
-- Female mecha pilot with wavy auburn hair
-- Red, white, and blue pilot suit, holding a pilot helmet
-- Giant blue and white combat robot (Mecha Unit 01) behind her
-- Futuristic military hangar bay environment
-- Retro 90s anime aesthetic
+- Cool anime gamer girl
+- Black hair with neon green highlights
+- Wearing oversized hoodie, headphones, and fishnet sleeves
+- Sitting in a gaming chair with triple monitor setup
+- Room lit by green and purple LED strip lighting
 
 Original Base Prompt:
-A determined female mecha pilot standing in a futuristic hangar bay in front of a giant blue and white combat robot. She has short wavy reddish-brown hair and wears a fitted red and white pilot suit while holding her flight helmet. Technicians and hangar lights fill the background. 90s classic mecha anime aesthetic.
+A cool anime gamer girl with green-highlighted black hair sitting relaxed in a gaming chair inside a dark bedroom lit with purple and green neon LED strips. Multiple computer monitors display gaming streams and chat windows. She wears a black oversized hoodie, headphones, and fishnet sleeves.
 
 Optional negative prompt:
-blurry, low quality, extra fingers, bad hands, deformed face, duplicate body, cropped, watermark, text, oversaturated, fantasy background`
+blurry, low quality, extra fingers, bad hands, deformed face, duplicate body, cropped, watermark, text, oversaturated, outdoor setting`
 });

@@ -1,122 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GPT-Prompt Arena</title>
   
-  <!-- ULTIMATE MASTER SEO META TAGS -->
-  <title>GPT-Prompt Arena - Free AI Prompts, Midjourney, ChatGPT & Sora Library</title>
-  <meta name="title" content="GPT-Prompt Arena - Free AI Prompts, Midjourney, ChatGPT & Sora Library">
-  <meta name="description" content="GPT-Prompt Arena is the ultimate repository for high-quality ChatGPT, Midjourney, Sora, Claude, and Anime AI prompts. Copy cinematic prompts for art and text.">
-  <meta name="keywords" content="GPT-Prompt Arena, GPT Prompt Arena, AI Prompts, ChatGPT Prompts, Midjourney Prompts, Sora Prompts, Free AI Prompt Library, Anime AI Prompts, Prompt Engineering, Visual AI Prompts">
-  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-  <meta name="author" content="GPT-Prompt Arena">
-  <meta name="theme-color" content="#000000">
-
-  <!-- CANONICAL LINK (CRITICAL FOR SEARCH INDEXING) -->
-  <link rel="canonical" href="https://evileye76791-victus.github.io/Vibe-Prompt-Space-/" />
-
-  <!-- OPEN GRAPH / SOCIAL MEDIA SEO -->
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://evileye76791-victus.github.io/Vibe-Prompt-Space-/">
-  <meta property="og:title" content="GPT-Prompt Arena - Best Free AI Prompts Repository">
-  <meta property="og:description" content="Discover, search, and copy top-rated AI prompts for Midjourney, ChatGPT, Gemini, Sora, and Anime Visuals.">
-  <meta property="og:site_name" content="GPT-Prompt Arena">
-
-  <!-- TWITTER CARDS -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="GPT-Prompt Arena - Free AI Prompts Library">
-  <meta name="twitter:description" content="Copy top-tier cinematic prompts for AI image and video generation tools.">
-
-  <!-- SCHEMA.ORG MASTER STRUCTURED DATA -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "GPT-Prompt Arena",
-    "alternateName": ["GPT Prompt Arena", "Prompt Arena AI"],
-    "url": "https://evileye76791-victus.github.io/Vibe-Prompt-Space-/",
-    "description": "High-quality AI prompt library for ChatGPT, Midjourney, Sora, Claude, and anime generation.",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": "https://evileye76791-victus.github.io/Vibe-Prompt-Space-/?s={search_term_string}",
-      "query-input": "required name=search_term_string"
-    }
-  }
-  </script>
-
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <!-- Google Fonts & Supabase -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <div class="page-container">
+  <!-- Dark Ambient Background Glows -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
 
-    <!-- Top Branding Header -->
-    <header class="brand-nav">
-      <div class="brand-logo-text">GPT-Prompt Arena</div>
-      <span class="beta-badge">PRO</span>
-    </header>
-
-    <!-- MAIN EXPLORE PAGE -->
-    <main id="page-explore" class="page active-page">
-      <section class="hero-banner">
-        <h1 class="hero-title">GPT-Prompt Arena</h1>
-        <p class="hero-subtitle">Ultimate Open Repository for Next-Gen AI Prompts</p>
-        
-        <div class="tags-cloud">
-          <span class="tag-chip tag-mj">Midjourney</span>
-          <span class="tag-chip tag-chat">ChatGPT</span>
-          <span class="tag-chip tag-claude">Claude</span>
-          <span class="tag-chip tag-gemini">Gemini</span>
-          <span class="tag-chip tag-sora">Sora / Luma</span>
-        </div>
-
-        <div class="search-wrapper">
-          <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <input type="text" id="searchInput" class="search-bar" placeholder="Search title, anime, style, or keywords..." oninput="renderGrid()">
-        </div>
-      </section>
-
-      <div class="section-header">
-        <h2 class="section-title">Explore Arena Prompts</h2>
+  <!-- Glass Header Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="logo" id="logoBtn">
+        <span>GPT-Prompt <span class="highlight">Arena</span></span>
       </div>
 
-      <div class="grid-1col" id="explore-grid"></div>
-    </main>
-
-    <!-- FULL DETAIL VIEW -->
-    <section id="full-detail-page" class="full-detail-view">
-      <button class="back-btn" onclick="closeFullPage()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-        Back to Arena
+      <!-- Square Glass + Icon Upload Button (Top Right Corner) -->
+      <button class="btn-square-plus" id="openUploadBtn" title="Upload Prompt">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
       </button>
+    </div>
+  </header>
 
-      <div class="detail-media-container" id="fullMediaBox" style="display: none;"></div>
+  <!-- Main View Area -->
+  <main class="main-content">
 
-      <div class="full-prompt-card">
-        <div class="card-head">
-          <h2 id="fullTitle"></h2>
-          <span class="tag" id="fullTag">AI PROMPT</span>
+    <!-- FEED PAGE VIEW -->
+    <section id="feedPage" class="page-view active">
+      
+      <!-- Dark Glass Search Bar -->
+      <div class="search-section">
+        <div class="search-glass-wrapper">
+          <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" id="searchInput" placeholder="Search prompts, styles, tags..." autocomplete="off" />
+          <button id="clearSearchBtn" class="clear-btn hidden">&times;</button>
         </div>
+      </div>
 
-        <div class="code-box-header">
-          <span>PROMPT TEXT</span>
-          <button class="copy-btn copy-btn-header" id="fullCopyBtnHeader" onclick="copyFullPrompt()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-            Copy
-          </button>
+      <!-- Prompt Cards Grid -->
+      <div id="promptGrid" class="prompt-grid">
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Loading prompt arena...</p>
         </div>
+      </div>
 
-        <div class="full-prompt-text" id="fullPromptText"></div>
+    </section>
 
-        <button class="copy-btn copy-btn-main" id="fullCopyBtnMain" onclick="copyFullPrompt()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-          Copy Full Prompt
+    <!-- UPLOAD PAGE VIEW -->
+    <section id="uploadPage" class="page-view">
+      <div class="upload-wrapper">
+        <button class="btn-back-ghost" id="backToFeedBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back to Arena
         </button>
+
+        <div class="glass-card upload-card">
+          <div class="card-header">
+            <h2>Share AI Creation</h2>
+            <p>Publish your prompt with its rendered output image or video.</p>
+          </div>
+
+          <form id="uploadForm">
+            <div class="form-group">
+              <label for="promptTitle">Title / Style</label>
+              <input type="text" id="promptTitle" class="form-control" placeholder="e.g. Cyberpunk Samurai, 8K Octane Render" required />
+            </div>
+
+            <div class="form-group">
+              <label for="promptText">Full AI Prompt</label>
+              <textarea id="promptText" class="form-control" placeholder="Paste exact prompt parameters here..." required></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="mediaFile">Upload Preview Media (Image / Video)</label>
+              <div class="file-drop-zone" id="dropZone">
+                <input type="file" id="mediaFile" accept="image/*,video/*" required />
+                <div class="drop-zone-content">
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  <p id="fileNameDisplay"><strong>Choose media file</strong> or drag & drop</p>
+                  <span class="file-hint">Supports MP4, PNG, JPG, WEBM</span>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn-glow-upload btn-block">
+              <span>Publish to Arena</span>
+            </button>
+          </form>
+
+          <div id="statusMsg" class="status-message"></div>
+        </div>
       </div>
     </section>
 
+  </main>
+
+  <!-- CARD CLICK FULL-PAGE DETAILS VIEW -->
+  <div id="previewPage" class="page-view full-preview-view">
+    <!-- Clean Top Navigation Bar with Back Button -->
+    <div class="preview-nav-bar">
+      <button class="btn-back-ghost" id="closePreviewBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Arena
+      </button>
+    </div>
+    
+    <div class="preview-layout">
+      <!-- Media Stage -->
+      <div class="preview-media-wrapper" id="modalMediaContainer"></div>
+
+      <!-- Details Sidebar -->
+      <div class="preview-details-sidebar">
+        <h1 id="modalTitle" class="details-title"></h1>
+
+        <div class="action-bar">
+          <button id="modalCopyBtn" class="action-btn copy-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span class="btn-text">Copy Prompt</span>
+          </button>
+          
+          <button id="modalLikeBtn" class="action-btn like-btn">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ffffff" stroke-width="2">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="prompt-text-section">
+          <h3>Prompt Command</h3>
+          <div id="modalPromptText" class="prompt-clean-text"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="script.js"></script>

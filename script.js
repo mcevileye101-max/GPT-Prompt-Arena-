@@ -1,136 +1,252 @@
-window.promptsData = [];
-let currentFullPrompt = "";
+const CLOUDINARY_CLOUD_NAME = 'pcjnaclc';
+const CLOUDINARY_PRESET = 'v3ppgbw7';
 
-function handleMediaFallback(el, baseRef, step = 1, isFullView = false) {
-  const container = isFullView ? document.getElementById('fullMediaBox') : el.parentElement;
-  if (step === 1) {
-    container.innerHTML = `<img src="${baseRef}.jpg" class="${isFullView ? 'full-detail-media' : 'media-preview'}" loading="lazy" onerror="handleMediaFallback(this, '${baseRef}', 2, ${isFullView})">`;
-  } else if (step === 2) {
-    container.innerHTML = `<img src="${baseRef}.png" class="${isFullView ? 'full-detail-media' : 'media-preview'}" loading="lazy" onerror="handleMediaFallback(this, '${baseRef}', 3, ${isFullView})">`;
+const SUPABASE_URL = 'https://kxwjamrojtgjsctvouul.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_fKj4xun5x0QwiKyfnOq1Yw_47OVArCt';
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let localPromptsCache = [];
+let searchQuery = '';
+let likedPrompts = new Set(JSON.parse(localStorage.getItem('liked_prompts') || '[]'));
+
+// DOM Elements
+const feedPage = document.getElementById('feedPage');
+const uploadPage = document.getElementById('uploadPage');
+const promptGrid = document.getElementById('promptGrid');
+const searchInput = document.getElementById('searchInput');
+const clearSearchBtn = document.getElementById('clearSearchBtn');
+const uploadForm = document.getElementById('uploadForm');
+const statusMsg = document.getElementById('statusMsg');
+const submitBtn = document.getElementById('submitBtn');
+const mediaFileInput = document.getElementById('mediaFile');
+const fileNameDisplay = document.getElementById('fileNameDisplay');
+
+// Full Preview Elements
+const previewPage = document.getElementById('previewPage');
+const closePreviewBtn = document.getElementById('closePreviewBtn');
+const modalMediaContainer = document.getElementById('modalMediaContainer');
+const modalTitle = document.getElementById('modalTitle');
+const modalPromptText = document.getElementById('modalPromptText');
+const modalCopyBtn = document.getElementById('modalCopyBtn');
+const modalLikeBtn = document.getElementById('modalLikeBtn');
+
+/* Page Switcher */
+function switchPage(pageId) {
+  document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.getElementById('openUploadBtn')?.addEventListener('click', () => switchPage('uploadPage'));
+document.getElementById('backToFeedBtn')?.addEventListener('click', () => switchPage('feedPage'));
+document.getElementById('logoBtn')?.addEventListener('click', () => switchPage('feedPage'));
+
+/* Media File Helper */
+mediaFileInput?.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    fileNameDisplay.innerHTML = `Selected: <strong>${escapeHTML(file.name)}</strong>`;
   } else {
-    container.style.display = 'none';
-    container.innerHTML = '';
+    fileNameDisplay.innerHTML = `<strong>Choose media file</strong> or drag & drop`;
+  }
+});
+
+/* Search Input Handler */
+searchInput?.addEventListener('input', (e) => {
+  searchQuery = e.target.value.trim().toLowerCase();
+  clearSearchBtn.classList.toggle('hidden', searchQuery === '');
+  renderPrompts();
+});
+
+clearSearchBtn?.addEventListener('click', () => {
+  searchInput.value = '';
+  searchQuery = '';
+  clearSearchBtn.classList.add('hidden');
+  renderPrompts();
+});
+
+/* Database Fetching */
+async function fetchPrompts() {
+  try {
+    const { data: prompts, error } = await supabaseClient
+      .from('prompts')
+      .select('*')
+      .order('id', { ascending: false });
+
+    if (error) throw error;
+    localPromptsCache = prompts || [];
+    renderPrompts();
+
+  } catch (err) {
+    console.error('Fetch error:', err);
+    promptGrid.innerHTML = `<div class="empty-state"><p style="color: #ef4444;">Failed to load prompt gallery: ${escapeHTML(err.message)}</p></div>`;
   }
 }
 
-async function loadScripts() {
-  const loadScript = (i) => new Promise((resolve) => {
-    const s = document.createElement('script');
-    s.src = `p${i}.js`;
-    s.onload = s.onerror = () => resolve();
-    document.body.appendChild(s);
+/* Render Prompt Grid Thumbnails */
+function renderPrompts() {
+  const filtered = localPromptsCache.filter(item => {
+    const titleMatch = (item.title || '').toLowerCase().includes(searchQuery);
+    const promptMatch = (item.prompt_text || '').toLowerCase().includes(searchQuery);
+    return titleMatch || promptMatch;
   });
 
-  for (let i = 1; i <= 50; i++) {
-    await loadScript(i);
-    renderGrid();
+  if (filtered.length === 0) {
+    promptGrid.innerHTML = `<div class="empty-state"><p>No matching prompts found.</p></div>`;
+    return;
   }
-}
 
-function createTakiesCard(item, index) {
-  const baseRef = item.refId || `p${index + 1}ref`;
-  return `
-    <div class="takies-card" onclick="openFullPage(${index})">
-      <div class="media-box">
-        <video src="${baseRef}.mp4" class="media-preview" muted loop playsinline preload="metadata" onloadeddata="this.currentTime = 0.1;" onerror="handleMediaFallback(this, '${baseRef}', 1, false)"></video>
+  promptGrid.innerHTML = '';
+
+  filtered.forEach(item => {
+    const isVideo = checkIsVideo(item.media_url);
+    const card = document.createElement('div');
+    card.className = 'glass-card-item';
+    card.onclick = () => openFullPreviewPage(item.id);
+
+    const mediaHTML = isVideo
+      ? `<video src="${item.media_url}" autoplay loop muted playsinline preload="auto"></video>`
+      : `<img src="${item.media_url}" alt="${escapeHTML(item.title)}" loading="lazy">`;
+
+    card.innerHTML = `
+      <div class="thumbnail-container">
+        ${mediaHTML}
       </div>
-      <div class="card-head">
-        <span class="card-title">${item.title || 'Untitled Prompt'}</span>
-        <span class="tag">${item.description || item.category || 'AI'}</span>
+      <div class="card-info">
+        <div class="card-title">${escapeHTML(item.title)}</div>
       </div>
-    </div>
-  `;
-}
+    `;
 
-function renderGrid() {
-  const grid = document.getElementById('explore-grid');
-  const rawQuery = document.getElementById('searchInput').value.toLowerCase().trim();
-  const searchWords = rawQuery.split(' ').filter(word => word.length > 0);
-  
-  grid.innerHTML = '';
-  const fragment = document.createDocumentFragment();
-  let count = 0;
-
-  window.promptsData.forEach((item, index) => {
-    const titleText = (item.title || '').toLowerCase();
-    const promptText = (item.prompt || '').toLowerCase();
-    const descText = (item.description || item.category || '').toLowerCase();
-    const combinedText = `${titleText} ${promptText} ${descText}`;
-
-    const matchesAllWords = searchWords.every(word => combinedText.includes(word));
-
-    if (searchWords.length === 0 || matchesAllWords) {
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = createTakiesCard(item, index);
-      fragment.appendChild(tempDiv.firstElementChild);
-      count++;
-    }
+    promptGrid.appendChild(card);
   });
-
-  if (count === 0 && searchWords.length > 0) {
-    grid.innerHTML = `<div class="no-results">No prompts matching "${rawQuery}" in GPT-Prompt Arena</div>`;
-  } else {
-    grid.appendChild(fragment);
-  }
 }
 
-function openFullPage(index) {
-  const item = window.promptsData[index];
+/* Toggle Heart/Like */
+function toggleLike(e, id) {
+  if (e) e.stopPropagation();
+  if (likedPrompts.has(id)) {
+    likedPrompts.delete(id);
+  } else {
+    likedPrompts.add(id);
+  }
+  localStorage.setItem('liked_prompts', JSON.stringify([...likedPrompts]));
+  updateModalLikeState(id);
+}
+
+/* CARD TAP PAR FULL PAGE OPEN HOGA */
+function openFullPreviewPage(id) {
+  const item = localPromptsCache.find(p => p.id === id);
   if (!item) return;
 
-  currentFullPrompt = item.prompt || "";
-  document.getElementById('page-explore').classList.remove('active-page');
-  const mediaBox = document.getElementById('fullMediaBox');
-  const baseRef = item.refId || `p${index + 1}ref`;
+  const isVideo = checkIsVideo(item.media_url);
 
-  mediaBox.style.display = 'flex';
-  mediaBox.innerHTML = `<video src="${baseRef}.mp4" class="full-detail-media" controls autoplay loop playsinline onerror="handleMediaFallback(this, '${baseRef}', 1, true)"></video>`;
+  modalMediaContainer.innerHTML = isVideo
+    ? `<video src="${item.media_url}" controls autoplay loop muted playsinline></video>`
+    : `<img src="${item.media_url}" alt="${escapeHTML(item.title)}">`;
 
-  document.getElementById('fullTitle').innerText = item.title || 'Untitled Prompt';
-  document.getElementById('fullTag').innerText = item.description || item.category || 'AI PROMPT';
-  document.getElementById('fullPromptText').innerText = currentFullPrompt;
+  modalTitle.innerText = item.title;
+  modalPromptText.innerText = item.prompt_text;
 
-  document.title = `${item.title || 'Prompt Detail'} | GPT-Prompt Arena`;
+  // Copy Prompt Action
+  modalCopyBtn.onclick = () => {
+    navigator.clipboard.writeText(item.prompt_text).then(() => {
+      const copySpan = modalCopyBtn.querySelector('.btn-text');
+      if (copySpan) copySpan.innerText = 'Copied to Clipboard!';
+      setTimeout(() => {
+        if (copySpan) copySpan.innerText = 'Copy Prompt';
+      }, 2000);
+    });
+  };
 
-  document.getElementById('full-detail-page').style.display = 'flex';
-  window.scrollTo(0, 0);
+  // Like Action
+  updateModalLikeState(id);
+  if (modalLikeBtn) {
+    modalLikeBtn.onclick = (e) => toggleLike(e, id);
+  }
+
+  switchPage('previewPage');
 }
 
-function closeFullPage() {
-  const mediaBox = document.getElementById('fullMediaBox');
-  mediaBox.innerHTML = '';
-  mediaBox.style.display = 'none';
-  document.getElementById('full-detail-page').style.display = 'none';
-  document.getElementById('page-explore').classList.add('active-page');
-  document.title = "GPT-Prompt Arena - Free AI Prompts, Midjourney, ChatGPT & Sora Library";
+function updateModalLikeState(id) {
+  if (!modalLikeBtn) return;
+  const isLiked = likedPrompts.has(id);
+  const heartIcon = modalLikeBtn.querySelector('svg');
+  if (heartIcon) {
+    heartIcon.setAttribute('fill', isLiked ? '#ef4444' : 'none');
+    heartIcon.setAttribute('stroke', isLiked ? '#ef4444' : '#ffffff');
+  }
 }
 
-function copyFullPrompt() {
-  navigator.clipboard.writeText(currentFullPrompt).then(() => {
-    const btnMain = document.getElementById('fullCopyBtnMain');
-    const btnHeader = document.getElementById('fullCopyBtnHeader');
+closePreviewBtn?.addEventListener('click', () => switchPage('feedPage'));
+
+/* Form Upload Handler */
+uploadForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  submitBtn.disabled = true;
+  statusMsg.style.color = 'var(--accent-cyan)';
+  statusMsg.innerText = '⏳ Uploading high quality media...';
+
+  const file = mediaFileInput.files[0];
+  const title = document.getElementById('promptTitle').value;
+  const promptText = document.getElementById('promptText').value;
+
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_PRESET);
+
+    const isVideoFile = file.type.startsWith('video/');
+    const uploadType = isVideoFile ? 'video' : 'image';
+
+    const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${uploadType}/upload`, {
+      method: 'POST',
+      body: formData
+    });
+
+    const uploadData = await uploadRes.json();
+    if (!uploadData.secure_url) throw new Error(uploadData.error?.message || 'Media upload failed.');
+
+    const mediaUrl = uploadData.secure_url;
+    statusMsg.innerText = '⚡ Saving prompt configuration...';
+
+    const { error } = await supabaseClient
+      .from('prompts')
+      .insert([{ title, prompt_text: promptText, media_url: mediaUrl }]);
+
+    if (error) throw error;
+
+    statusMsg.style.color = '#22c55e';
+    statusMsg.innerText = '✅ Successfully published!';
     
-    if (btnMain) {
-      btnMain.innerHTML = `✓ Copied to Clipboard!`;
-      btnMain.classList.add('copied');
-    }
-    if (btnHeader) {
-      btnHeader.innerHTML = `✓ Copied!`;
-      btnHeader.classList.add('copied');
-    }
+    uploadForm.reset();
+    fileNameDisplay.innerHTML = `<strong>Choose media file</strong> or drag & drop`;
 
     setTimeout(() => {
-      if (btnMain) {
-        btnMain.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Full Prompt`;
-        btnMain.classList.remove('copied');
-      }
-      if (btnHeader) {
-        btnHeader.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy`;
-        btnHeader.classList.remove('copied');
-      }
-    }, 2000);
-  });
+      statusMsg.innerText = '';
+      switchPage('feedPage');
+      fetchPrompts();
+    }, 1200);
+
+  } catch (err) {
+    console.error('Upload Error:', err);
+    statusMsg.style.color = '#ef4444';
+    statusMsg.innerText = '❌ Error: ' + err.message;
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+function checkIsVideo(url) {
+  if (!url) return false;
+  return url.includes('/video/') || /\.(mp4|webm|ogg|mov|m4v)$/i.test(url);
 }
 
-loadScripts();
-          
+function escapeHTML(str) {
+  if (!str) return '';
+  return str.replace(/[&<>'"]/g, tag => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&#34;'
+  }[tag] || tag));
+}
+
+window.addEventListener('DOMContentLoaded', fetchPrompts);

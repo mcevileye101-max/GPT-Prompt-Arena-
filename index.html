@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GPT-Prompt Arena</title>
+  <meta name="description" content="Discover, copy and share the exact AI prompts behind stunning images and videos.">
+  <meta name="theme-color" content="#0c0c10">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar (desktop) / tab bar (mobile) -->
+    
+
+    <div class="stage">
+      <header class="topbar"><div class="bar-inner">
+        <div class="logo" id="logoBtn"><span class="logo-text">Prompt Arena</span></div>
+        <div class="top-links">
+          <a href="#/studio">Studio</a><a href="#/help" class="hide-sm">Help</a>
+          <button class="icon-btn" id="paletteBtn" aria-label="Search everything (Ctrl K)" title="Search everything (Ctrl K)"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button>
+        </div>
+        <button class="btn-primary btn-sm" id="topCreateBtn">Sell your prompt</button>
+      </div></header>
+
+      <main class="main-content">
+        <!-- EXPLORE -->
+        <section id="feedPage" class="page-view active">
+          <div class="hero">
+            <h1>Find the prompt behind every great AI image</h1>
+            <div class="search-glass-wrapper">
+              <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input type="text" id="searchInput" placeholder="Search prompts, styles, ideas" autocomplete="off" />
+              <kbd class="kbd">/</kbd>
+              <button id="clearSearchBtn" class="clear-btn hidden" aria-label="Clear search">&times;</button>
+              <div class="suggest" id="suggestBox" hidden></div>
+            </div>
+            <div class="recent-searches" id="recentSearches" hidden></div>
+            <p>Copy the exact prompt, try it in ChatGPT, or share your own.</p>
+            <div class="hero-tags" id="heroTags">
+              <button id="surpriseBtn" class="surprise">Surprise me</button>
+              <button data-q="portrait">Portrait</button><button data-q="cyberpunk">Cyberpunk</button><button data-q="anime">Anime</button><button data-q="logo">Logo</button><button data-q="3d">3D</button><button data-q="landscape">Landscape</button>
+            </div>
+            <p class="hero-count"><b id="totalCount">0</b> prompts to explore</p>
+          </div>
+          <div id="featuredSection" class="featured" hidden>
+            <div class="feat-main" id="featMain"></div>
+            <div class="sec-head"><h2>New arrivals</h2><span>Fresh prompts from the community</span></div>
+            <div class="rail" id="newRail"></div>
+          </div>
+          <section class="potd" id="potd" hidden></section>
+          <div class="rail-wrap" id="latestWrap" hidden><div class="rail-head"><h2>Latest drops</h2><span>Fresh from the community</span></div><div class="rail" id="latestRail"></div></div>
+          <div class="cats" id="catChips">
+            <button class="cat active" data-cat="">All</button><button class="cat" data-cat="portrait">Portraits</button><button class="cat" data-cat="anime">Anime</button><button class="cat" data-cat="cyber">Cyberpunk</button><button class="cat" data-cat="fantasy">Fantasy</button><button class="cat" data-cat="logo">Logos</button><button class="cat" data-cat="product">Products</button><button class="cat" data-cat="landscape">Landscapes</button><button class="cat" data-cat="3d">3D</button><button class="cat" data-cat="realistic">Photorealistic</button>
+          </div>
+          <div class="page-head">
+            <div><h2>Browse</h2><p id="resultInfo">Browse prompts with their rendered results.</p></div>
+            <div class="controls">
+              <div class="chips" id="typeChips">
+                <button class="chip active" data-type="all">All</button>
+                <button class="chip" data-type="image">Images</button>
+                <button class="chip" data-type="video">Videos</button>
+              </div>
+              <div class="chips" id="densityBtns" title="Grid size">
+                <button class="chip active" data-d="comfy" aria-label="Comfortable grid"><svg width="15" height="15" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg></button>
+                <button class="chip" data-d="compact" aria-label="Compact grid"><svg width="15" height="15" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="10" y="3" width="5" height="5" rx="1"/><rect x="17" y="3" width="4" height="5" rx="1"/><rect x="3" y="10" width="5" height="5" rx="1"/><rect x="10" y="10" width="5" height="5" rx="1"/><rect x="17" y="10" width="4" height="5" rx="1"/><rect x="3" y="17" width="5" height="4" rx="1"/><rect x="10" y="17" width="5" height="4" rx="1"/><rect x="17" y="17" width="4" height="4" rx="1"/></svg></button>
+              </div>
+              <select id="modelSelect" class="select" aria-label="Model" hidden><option value="">All models</option></select>
+              <select id="sortSelect" class="select" aria-label="Sort">
+                <option value="new">Newest</option>
+                <option value="old">Oldest</option>
+                <option value="az">A to Z</option>
+                <option value="liked">Liked first</option>
+              </select>
+            </div>
+          </div>
+          <div id="promptGrid" class="prompt-grid">
+            <div class="sk" style="height:220px"></div><div class="sk" style="height:300px"></div><div class="sk" style="height:180px"></div><div class="sk" style="height:260px"></div><div class="sk" style="height:320px"></div><div class="sk" style="height:200px"></div><div class="sk" style="height:240px"></div><div class="sk" style="height:280px"></div>
+          </div>
+        <div class="more-wrap"><button id="loadMoreBtn" class="btn-ghost" hidden>Show more prompts</button></div>
+        </section>
+
+        <!-- LIKED -->
+        <section id="profilePage" class="page-view">
+          <div class="profile-head">
+            <div class="avatar" id="profileAvatar">G</div>
+            <div class="profile-id"><input id="profileName" class="name-input" maxlength="24" value="Guest" aria-label="Your name" /><p>Your name and activity are saved on this device</p></div>
+          </div>
+          <div class="achievements" id="achievements"></div>
+          <div class="stats"><div><b id="statLiked">0</b><span>Liked</span></div><div><b id="statCopied">0</b><span>Prompts copied</span></div><div><b id="statViewed">0</b><span>Recently viewed</span></div><div><b id="statStreak">1</b><span>Day streak</span></div></div>
+          <div class="achievements" id="achievements"></div>
+          <div class="tabs" id="profileTabs"><button class="cat active" data-tab="liked">Liked</button><button class="cat" data-tab="collections">Collections</button><button class="cat" data-tab="recent">Recently viewed</button><button class="cat" data-tab="settings">Settings</button><button class="btn-ghost" id="clearLikedBtn">Clear liked</button></div>
+          <div id="likedGrid" class="prompt-grid"></div>
+          <div id="recentGrid" class="prompt-grid" hidden></div>
+          <div id="collectionsPane" hidden></div>
+          <div id="settingsPane" class="settings" hidden>
+            <label class="setting"><div><b>Autoplay video previews</b><span>Turn off to save data. Videos then play on hover.</span></div><input type="checkbox" id="setAutoplay" class="switch"></label>
+            <label class="setting"><div><b>Extended upload fields</b><span>Category, AI model, tags and author. Turn on after adding these columns in Supabase.</span></div><input type="checkbox" id="setExt" class="switch"></label>
+            <div class="setting"><div><b>Backup</b><span>Download or restore your likes, collections and history.</span></div><div class="btn-row"><button class="btn-ghost" id="exportBtn">Export</button><label class="btn-ghost">Import<input type="file" id="importFile" accept="application/json" hidden></label></div></div>
+            <div class="setting"><div><b>Reset local data</b><span>Clears likes, collections, history, drafts and your name on this device.</span></div><button class="btn-ghost" id="resetDataBtn">Reset</button></div>
+          </div>
+        </section>
+
+        <!-- CREATE -->
+        <section id="uploadPage" class="page-view">
+          <div class="upload-wrapper">
+            <div class="page-head"><div><h1>Create prompt</h1><p>Publish a prompt with the image or video it produced.</p></div></div>
+            <div class="create-layout">
+              <div class="glass-card upload-card">
+                <form id="uploadForm">
+                  <div class="form-group">
+                    <label for="promptTitle">Title</label>
+                    <input type="text" id="promptTitle" class="form-control" maxlength="80" placeholder="e.g. Cyberpunk samurai, 8K render" required />
+                    <span class="counter" id="titleCount">0 / 80</span>
+                  </div>
+                  <div class="form-group">
+                    <label for="promptText">Prompt</label>
+                    <textarea id="promptText" class="form-control" placeholder="Paste the exact prompt and parameters" required></textarea>
+                    <span class="counter" id="textCount">0 characters</span>
+                  </div>
+                  <div id="extFields" hidden>
+                    <div class="form-group two"><div><label for="promptCategory">Category</label><select id="promptCategory" class="form-control"><option value="">Choose</option><option value="portrait">Portrait</option><option value="anime">Anime</option><option value="cyber">Cyberpunk</option><option value="fantasy">Fantasy</option><option value="logo">Logo</option><option value="product">Product</option><option value="landscape">Landscape</option><option value="3d">3D</option><option value="realistic">Photorealistic</option></select></div>
+                    <div><label for="promptModel">AI model</label><select id="promptModel" class="form-control"><option value="">Choose</option><option>Midjourney</option><option>DALL·E</option><option>Stable Diffusion</option><option>Flux</option><option>Sora</option><option>Veo</option><option>Runway</option><option>ChatGPT</option></select></div></div>
+                    <div class="form-group"><label for="promptTags">Tags (comma separated)</label><input id="promptTags" class="form-control" maxlength="100" placeholder="neon, portrait, cinematic" /></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="mediaFile">Result media</label>
+                    <div class="file-drop-zone" id="dropZone">
+                      <input type="file" id="mediaFile" accept="image/*,video/*" required />
+                      <div class="drop-zone-content">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <p id="fileNameDisplay"><strong>Choose media file</strong> or drag & drop</p>
+                        <span class="file-hint">PNG, JPG, WEBP, MP4, WEBM</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="submit" id="submitBtn" class="btn-primary btn-block"><span>Publish</span></button>
+                </form>
+                <div id="statusMsg" class="status-message"></div>
+              </div>
+              <aside class="live-preview">
+                <span class="lp-label">Live preview</span>
+                <div class="glass-card-item static">
+                  <div class="thumbnail-container" id="lpMedia"><div class="lp-empty">Your media appears here</div></div>
+                  <div class="card-info"><div class="card-title" id="lpTitle">Untitled prompt</div></div>
+                </div>
+              </aside>
+            </div>
+          </div>
+        </section>
+      <section id="aboutPage" class="page-view">
+          <div class="about">
+            <h1>How Prompt Arena works</h1>
+            <p class="lead">A community library of AI prompts, each shown with the image or video it produced.</p>
+            <div class="steps">
+              <div><span>1</span><b>Browse</b><p>Search, filter by style or model, or tap Surprise me.</p></div>
+              <div><span>2</span><b>Copy or customize</b><p>Copy the exact prompt, or fill in its placeholders first.</p></div>
+              <div><span>3</span><b>Share yours</b><p>Publish a prompt with its result from the Create tab.</p></div>
+            </div>
+            <h2>Questions</h2>
+            <details><summary>Is it free?</summary><p>Browsing, copying and publishing prompts are free.</p></details>
+            <details><summary>Where are my likes and collections stored?</summary><p>On this device, in your browser. They are not shared across devices yet.</p></details>
+            <details><summary>What can I upload?</summary><p>Images up to 10 MB and videos up to 100 MB, together with the prompt that created them.</p></details>
+            <details><summary>What are placeholders?</summary><p>If a prompt contains parts in [square brackets] or {curly braces}, the prompt page lets you fill them in and copy your version.</p></details>
+            <details><summary>Which models are shown?</summary><p>Model badges such as Midjourney or DALL·E appear when the prompt text mentions them.</p></details>
+            <a class="btn-primary about-cta" href="#/explore">Start exploring</a>
+          </div>
+        </section>
+      
+        <!-- STUDIO -->
+        <section id="studioPage" class="page-view">
+          <div class="page-head" style="margin-top:2.5rem"><div><h1>Prompt Studio</h1><p>Build a polished prompt in seconds, then copy it, try it, or publish it.</p></div>
+            <button class="btn-ghost" id="stShuffle">Randomize</button></div>
+          <div class="studio">
+            <div>
+              <div class="form-group"><label for="stSubject">Subject</label><input id="stSubject" class="form-control" maxlength="140" placeholder="e.g. a lone samurai on a neon rooftop" /></div>
+              <div id="studioOpts"></div>
+            </div>
+            <aside class="studio-out">
+              <span class="lp-label">Your prompt</span>
+              <div id="stOutput" class="prompt-clean-text"></div>
+              <div class="action-bar" style="margin-top:1rem">
+                <button id="stCopy" class="action-btn copy-btn">Copy prompt</button>
+                <a id="stChat" class="action-btn" target="_blank" rel="noopener" style="flex:1">Try in ChatGPT</a>
+                <button id="stUse" class="action-btn" style="flex:1">Use in Create</button>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- HELP -->
+        <section id="helpPage" class="page-view">
+          <div class="page-head" style="margin-top:2.5rem"><div><h1>Help and shortcuts</h1><p>Everything you need to get the most out of Prompt Arena.</p></div></div>
+          <div class="help">
+            <div class="help-faq">
+              <details open><summary>How do I use a prompt?</summary><p>Open any card, tap Copy Prompt, and paste it into your AI tool. Tap Try in ChatGPT to open it there directly.</p></details>
+              <details><summary>How do I publish my own prompt?</summary><p>Go to Create, add a title, your full prompt and the image or video it produced, then press Publish.</p></details>
+              <details><summary>What are collections?</summary><p>Folders for your favorite prompts. Open a prompt, tap Save, and pick or create a collection. Find them under User, Collections.</p></details>
+              <details><summary>What is Prompt Studio?</summary><p>A builder that turns a subject, style, lighting and camera choices into a ready prompt. Send it straight to Create.</p></details>
+              <details><summary>Where is my data stored?</summary><p>Likes, collections, history and your name live in this browser. Use Settings, Export to back them up.</p></details>
+            </div>
+            <div class="help-keys">
+              <h3>Keyboard shortcuts</h3>
+              <div><kbd>Ctrl</kbd> <kbd>K</kbd><span>Search everything</span></div>
+              <div><kbd>/</kbd><span>Focus search</span></div>
+              <div><kbd>Esc</kbd><span>Close prompt or dialog</span></div>
+              <div><kbd>&larr;</kbd> <kbd>&rarr;</kbd><span>Previous or next prompt</span></div>
+            </div>
+          </div>
+        </section>
+      </main>
+      <footer class="footer"><span>GPT-Prompt Arena</span><div><a href="#/explore">Explore</a><a href="#/liked">Liked</a><a href="#/create">Create</a><a href="#/studio">Studio</a><a href="#/help">Help</a><a href="#/about">How it works</a></div></footer>
+    </div>
+  </div>
+
+  <!-- PROMPT DETAIL -->
+  <div id="previewPage" class="page-view full-preview-view">
+    <div class="preview-nav-bar">
+      <button class="btn-back-ghost" id="closePreviewBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back
+      </button>
+      <div class="nav-steps">
+        <button class="icon-btn" id="prevPromptBtn" title="Previous (←)" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <button class="icon-btn" id="nextPromptBtn" title="Next (→)" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+      </div>
+    </div>
+    <div class="preview-layout">
+      <div class="preview-media-wrapper" id="modalMediaContainer"></div>
+      <div class="preview-details-sidebar">
+        <h1 id="modalTitle" class="details-title"></h1>
+        <div class="badges" id="modalBadges"></div>
+        <p class="byline" id="modalAuthor" hidden></p>
+        <div class="action-bar">
+          <button id="modalCopyBtn" class="action-btn copy-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span class="btn-text">Copy Prompt</span>
+          </button>
+          <button id="modalLikeBtn" class="action-btn like-btn" aria-label="Like">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          </button>
+          <button id="modalShareBtn" class="action-btn" aria-label="Copy link" title="Copy link">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>
+          </button>
+          <button id="modalSaveBtn" class="action-btn" title="Save to collection"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Save</button>
+          <a id="modalChatBtn" class="action-btn" target="_blank" rel="noopener" title="Try in ChatGPT">Try in ChatGPT</a>
+          <a id="modalDownloadBtn" class="action-btn" target="_blank" rel="noopener" aria-label="Download" title="Download media">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </a>
+        </div>
+        <div class="prompt-text-section">
+          <h3>Prompt</h3>
+          <div id="modalPromptText" class="prompt-clean-text"></div>
+          <span class="counter" id="modalMeta"></span>
+          <div class="badges params" id="modalParams"></div>
+        </div>
+        <div class="prompt-text-section" id="customSection" hidden>
+          <h3>Customize</h3><p class="hint">Fill in the placeholders, then copy your own version.</p>
+          <div id="customFields"></div><button class="btn-ghost" id="customCopyBtn">Copy customized prompt</button>
+        </div>
+        <div class="prompt-text-section" id="anatomyWrap"><h3>Tags and key phrases</h3><div id="anatomy"></div></div>
+        <div class="prompt-text-section" id="relatedSection">
+          <h3>More like this</h3>
+          <div id="relatedGrid" class="related-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav dock" aria-label="Main">
+    <a class="nav-item" href="#/explore" data-route="explore"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span>Explore</span></a>
+    <a class="nav-item" href="#/create" data-route="create" id="openUploadBtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><span>Create</span></a>
+    <a class="nav-item" href="#/profile" data-route="profile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>User</span><em class="badge" id="likedBadge">0</em></a>
+  </nav>
+
+  <div id="lightbox" class="lightbox" hidden></div>
+
+  <div id="saveSheet" class="sheet" hidden><div class="sheet-card">
+    <div class="sheet-head"><b>Save to collection</b><button class="icon-btn" id="sheetClose" aria-label="Close">&times;</button></div>
+    <div id="sheetList"></div>
+    <form id="newColForm" class="new-col"><input id="newColName" class="form-control" placeholder="New collection name" maxlength="30" required /><button class="btn-primary btn-add">Create</button></form>
+  </div></div>
+
+  <div id="palette" class="sheet pal" hidden><div class="sheet-card pal-card">
+    <input id="palInput" class="form-control" placeholder="Search prompts, pages and actions" autocomplete="off" />
+    <div id="palList" class="pal-list"></div>
+    <div class="pal-foot"><span>Up and Down to move</span><span>Enter to open</span><span>Esc to close</span></div>
+  </div></div>
+  <button id="toTop" class="to-top" aria-label="Back to top"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="script.js"></script>
+</body>
+</html>
